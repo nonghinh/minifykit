@@ -9,25 +9,22 @@ const { currentSlug } = Astro.props;
 
 type Kind = ToolMeta["kind"];
 
+interface SubKind {
+  kind: Kind;
+  label: string;
+}
+
 interface MenuGroup {
   id: string;
   label: string;
-  /** When set, render the panel as titled sub-sections in this order. */
-  subKinds?: { kind: Kind; label: string }[];
   kinds: Kind[];
+  /** When set, panels render titled sub-sections in this order. */
+  subKinds?: SubKind[];
 }
 
 const MENUS: MenuGroup[] = [
-  {
-    id: "minify",
-    label: "Minify",
-    kinds: ["minify"],
-  },
-  {
-    id: "format",
-    label: "Format",
-    kinds: ["format"],
-  },
+  { id: "minify", label: "Minify", kinds: ["minify"] },
+  { id: "format", label: "Format", kinds: ["format"] },
   {
     id: "encode",
     label: "Encode/Decode",
@@ -58,18 +55,24 @@ const itemInactive =
   "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800";
 
 const buttonBase =
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 sm:px-3";
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2";
 const buttonActive =
   "font-semibold text-slate-900 hover:bg-slate-100 dark:text-slate-50 dark:hover:bg-slate-800";
 const buttonInactive =
   "font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100";
+
+const subHeader =
+  "mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-500";
+
+const iconBtn =
+  "inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-50";
 ---
 
 <header
   class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"
 >
   <div
-    class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6"
+    class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6"
   >
     <a
       href="/"
@@ -78,14 +81,12 @@ const buttonInactive =
       <span
         class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 font-mono text-xs font-bold text-slate-50 dark:bg-slate-100 dark:text-slate-900"
         aria-hidden="true">{`{}`}</span>
-      <span class="hidden text-sm font-semibold tracking-tight sm:inline"
-        >MinifyKit</span
-      >
+      <span class="text-sm font-semibold tracking-tight">MinifyKit</span>
     </a>
 
     <nav
       aria-label="Tools"
-      class="flex flex-1 items-center justify-center gap-1 sm:gap-2"
+      class="hidden flex-1 items-center justify-center gap-1 md:flex"
     >
       {
         MENUS.map((menu) => {
@@ -142,9 +143,7 @@ const buttonInactive =
                       if (tools.length === 0) return null;
                       return (
                         <div>
-                          <div class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-500">
-                            {sub.label}
-                          </div>
+                          <div class={subHeader}>{sub.label}</div>
                           <ul class="flex flex-col">
                             {tools.map((t) => {
                               const isCurrent = t.slug === currentSlug;
@@ -226,110 +225,298 @@ const buttonInactive =
       }
     </nav>
 
-    <button
-      type="button"
-      data-theme-toggle
-      aria-label="Toggle theme"
-      class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-50"
-    >
-      <svg
-        class="hidden h-4 w-4 dark:block"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        data-mobile-menu-button
+        aria-controls="mk-mobile-menu"
+        aria-expanded="false"
+        aria-label="Open menu"
+        class:list={[iconBtn, "md:hidden"]}
       >
-        <circle cx="12" cy="12" r="4"></circle>
-        <path
-          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-        ></path>
-      </svg>
-      <svg
-        class="h-4 w-4 dark:hidden"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        <svg
+          data-icon-open
+          class="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <svg
+          data-icon-close
+          class="hidden h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        data-theme-toggle
+        aria-label="Toggle theme"
+        class={iconBtn}
       >
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-    </button>
+        <svg
+          class="hidden h-4 w-4 dark:block"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path
+            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          ></path>
+        </svg>
+        <svg
+          class="h-4 w-4 dark:hidden"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div
+    id="mk-mobile-menu"
+    data-mobile-menu
+    hidden
+    class="border-t border-slate-200 bg-white md:hidden dark:border-slate-800 dark:bg-slate-950"
+  >
+    <div class="mx-auto w-full max-w-6xl space-y-4 px-4 py-4">
+      {
+        MENUS.map((menu) => {
+          if (menu.subKinds) {
+            return (
+              <div>
+                <div class={subHeader}>{menu.label}</div>
+                <div class="space-y-3">
+                  {menu.subKinds.map((sub) => {
+                    const tools = toolsFor([sub.kind]);
+                    if (tools.length === 0) return null;
+                    return (
+                      <div>
+                        <div class="mb-1 px-2 text-[10px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          {sub.label}
+                        </div>
+                        <ul class="flex flex-col">
+                          {tools.map((t) => {
+                            const isCurrent = t.slug === currentSlug;
+                            return (
+                              <li>
+                                <a
+                                  href={t.slug}
+                                  aria-current={isCurrent ? "page" : undefined}
+                                  class:list={[
+                                    itemBase,
+                                    isCurrent ? itemActive : itemInactive,
+                                  ]}
+                                >
+                                  <span>{t.label}</span>
+                                  {isCurrent && (
+                                    <svg
+                                      class="h-3.5 w-3.5"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="2.5"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      aria-hidden="true"
+                                    >
+                                      <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                  )}
+                                </a>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div>
+              <div class={subHeader}>{menu.label}</div>
+              <ul class="flex flex-col">
+                {toolsFor(menu.kinds).map((t) => {
+                  const isCurrent = t.slug === currentSlug;
+                  return (
+                    <li>
+                      <a
+                        href={t.slug}
+                        aria-current={isCurrent ? "page" : undefined}
+                        class:list={[
+                          itemBase,
+                          isCurrent ? itemActive : itemInactive,
+                        ]}
+                      >
+                        <span>{t.label}</span>
+                        {isCurrent && (
+                          <svg
+                            class="h-3.5 w-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M20 6 9 17l-5-5" />
+                          </svg>
+                        )}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })
+      }
+    </div>
   </div>
 </header>
 
 <script>
   function initToolsMenus() {
-    const buttons = Array.from(
-      document.querySelectorAll<HTMLButtonElement>(
-        "[data-tools-menu-button]",
-      ),
+    const dropdownButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-tools-menu-button]"),
     );
     const panels = Array.from(
       document.querySelectorAll<HTMLElement>("[data-tools-menu]"),
     );
-    if (buttons.length === 0) return;
+    const mobileBtn = document.querySelector<HTMLButtonElement>(
+      "[data-mobile-menu-button]",
+    );
+    const mobilePanel = document.querySelector<HTMLElement>(
+      "[data-mobile-menu]",
+    );
+    const mobileIconOpen = mobileBtn?.querySelector<SVGElement>(
+      "[data-icon-open]",
+    );
+    const mobileIconClose = mobileBtn?.querySelector<SVGElement>(
+      "[data-icon-close]",
+    );
 
-    function findBtn(id: string | null) {
-      return buttons.find((b) => b.dataset.menuId === id) ?? null;
-    }
-    function findPanel(id: string | null) {
-      return panels.find((p) => p.dataset.menuId === id) ?? null;
-    }
-
-    function closeAll() {
-      for (const btn of buttons) {
+    function closeDropdowns() {
+      for (const btn of dropdownButtons) {
         btn.setAttribute("aria-expanded", "false");
-        const chev = btn.querySelector<HTMLElement>("[data-tools-menu-chevron]");
+        const chev = btn.querySelector<HTMLElement>(
+          "[data-tools-menu-chevron]",
+        );
         if (chev) chev.style.transform = "";
       }
       for (const panel of panels) panel.hidden = true;
     }
 
-    function open(id: string) {
-      closeAll();
-      const btn = findBtn(id);
-      const panel = findPanel(id);
+    function openDropdown(id: string) {
+      closeDropdowns();
+      const btn = dropdownButtons.find((b) => b.dataset.menuId === id);
+      const panel = panels.find((p) => p.dataset.menuId === id);
       if (btn) {
         btn.setAttribute("aria-expanded", "true");
-        const chev = btn.querySelector<HTMLElement>("[data-tools-menu-chevron]");
+        const chev = btn.querySelector<HTMLElement>(
+          "[data-tools-menu-chevron]",
+        );
         if (chev) chev.style.transform = "rotate(180deg)";
       }
       if (panel) panel.hidden = false;
     }
 
-    for (const btn of buttons) {
+    function setMobileOpen(open: boolean) {
+      if (!mobileBtn || !mobilePanel) return;
+      mobileBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      mobileBtn.setAttribute(
+        "aria-label",
+        open ? "Close menu" : "Open menu",
+      );
+      mobilePanel.hidden = !open;
+      mobileIconOpen?.classList.toggle("hidden", open);
+      mobileIconClose?.classList.toggle("hidden", !open);
+    }
+
+    function closeAll() {
+      closeDropdowns();
+      setMobileOpen(false);
+    }
+
+    for (const btn of dropdownButtons) {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const id = btn.dataset.menuId ?? "";
-        if (btn.getAttribute("aria-expanded") === "true") closeAll();
-        else open(id);
+        if (btn.getAttribute("aria-expanded") === "true") closeDropdowns();
+        else openDropdown(id);
       });
     }
 
+    mobileBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = mobileBtn.getAttribute("aria-expanded") === "true";
+      closeDropdowns();
+      setMobileOpen(!isOpen);
+    });
+
     document.addEventListener("click", (e) => {
-      const anyOpen = buttons.some(
-        (b) => b.getAttribute("aria-expanded") === "true",
-      );
-      if (!anyOpen) return;
       const target = e.target as Node;
-      const insideAny =
-        buttons.some((b) => b.contains(target)) ||
+      const insideDropdown =
+        dropdownButtons.some((b) => b.contains(target)) ||
         panels.some((p) => p.contains(target));
-      if (!insideAny) closeAll();
+      if (!insideDropdown) closeDropdowns();
+
+      if (mobileBtn && mobilePanel) {
+        const insideMobile =
+          mobileBtn.contains(target) || mobilePanel.contains(target);
+        if (!insideMobile) setMobileOpen(false);
+      }
     });
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
-      const activeBtn = buttons.find(
-        (b) => b.getAttribute("aria-expanded") === "true",
-      );
-      if (!activeBtn) return;
+      const anyOpen =
+        dropdownButtons.some(
+          (b) => b.getAttribute("aria-expanded") === "true",
+        ) || mobileBtn?.getAttribute("aria-expanded") === "true";
+      if (!anyOpen) return;
       closeAll();
-      activeBtn.focus();
+      (
+        dropdownButtons.find(
+          (b) => b.getAttribute("aria-expanded") === "true",
+        ) ?? mobileBtn
+      )?.focus();
+    });
+
+    window.addEventListener("resize", () => {
+      // Going to desktop should drop the mobile panel; going to mobile drops desktop dropdowns.
+      if (window.matchMedia("(min-width: 768px)").matches) setMobileOpen(false);
+      else closeDropdowns();
     });
   }
   initToolsMenus();

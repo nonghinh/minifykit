@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
+import Topbar from "~/components/Topbar.astro";
 import { TOOLS } from "~/lib/processors";
 import { websiteSchema } from "~/lib/seo";
 
@@ -47,28 +48,7 @@ const KIND_LABEL: Record<string, string> = {
 
 <BaseLayout jsonLd={schema}>
   <div class="flex min-h-screen flex-col">
-    <header
-      class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"
-    >
-      <div
-        class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
-      >
-        <a
-          href="/"
-          class="flex shrink-0 items-center gap-2 text-slate-900 dark:text-slate-50"
-        >
-          <span
-            class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 font-mono text-xs font-bold text-slate-50 dark:bg-slate-100 dark:text-slate-900"
-            aria-hidden="true">{`{}`}</span>
-          <span class="text-sm font-semibold tracking-tight">MinifyKit</span>
-        </a>
-        <a
-          href="https://github.com"
-          class="text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-          >v1.0</a
-        >
-      </div>
-    </header>
+    <Topbar />
 
     <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6 sm:py-20">
       <section class="mx-auto max-w-3xl text-center">
