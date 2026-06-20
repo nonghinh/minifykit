@@ -1,6 +1,13 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { TOOLS } from "~/lib/processors";
+import { websiteSchema } from "~/lib/seo";
+
+const siteUrl = new URL("/", Astro.site).toString();
+const schema = websiteSchema(
+  siteUrl,
+  "Free in-browser tools to minify, format, and analyze code. JavaScript, CSS, JSON, HTML, and text — all client-side.",
+);
 
 const ICONS: Record<string, string> = {
   "minify-js":
@@ -24,7 +31,7 @@ const KIND_LABEL: Record<string, string> = {
 };
 ---
 
-<BaseLayout>
+<BaseLayout jsonLd={schema}>
   <div class="flex min-h-screen flex-col">
     <header
       class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"

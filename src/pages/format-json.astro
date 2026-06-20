@@ -2,10 +2,13 @@
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import ToolApp from "~/components/ToolApp.astro";
 import { getTool } from "~/lib/processors";
+import { toolApplicationSchema } from "~/lib/seo";
 
 const tool = getTool("format-json");
+const canonical = new URL(tool.slug + "/", Astro.site).toString();
+const schema = toolApplicationSchema(tool, canonical);
 ---
 
-<BaseLayout title={tool.title} description={tool.description}>
+<BaseLayout title={tool.title} description={tool.description} jsonLd={schema}>
   <ToolApp toolId={tool.id} />
 </BaseLayout>
