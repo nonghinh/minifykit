@@ -1,0 +1,11 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import ToolApp from "~/components/ToolApp.astro";
+import { getTool } from "~/lib/processors";
+
+const tool = getTool("format-html");
+---
+
+<BaseLayout title={tool.title} description={tool.description}>
+  <ToolApp toolId={tool.id} />
+</BaseLayout>

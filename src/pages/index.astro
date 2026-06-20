@@ -1,0 +1,146 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { TOOLS } from "~/lib/processors";
+
+const ICONS: Record<string, string> = {
+  "minify-js":
+    '<path d="m12 3-1.6 4.2L6 9l4.4 1.8L12 15l1.6-4.2L18 9l-4.4-1.8z"/><path d="M5 19l1-2.5L8 16M19 18l-.7-1.7L17 16"/>',
+  "minify-css":
+    '<path d="m12 3-1.6 4.2L6 9l4.4 1.8L12 15l1.6-4.2L18 9l-4.4-1.8z"/><path d="M5 19l1-2.5L8 16M19 18l-.7-1.7L17 16"/>',
+  "format-json":
+    '<path d="M8 3H6a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2v0a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2"/><path d="M16 3h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2v0a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2"/>',
+  "format-html":
+    '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
+  "format-css":
+    '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
+  "count-text":
+    '<path d="M9 7V4h6v3"/><path d="M12 4v16"/><path d="M8 20h8"/><path d="M4 11h4M16 11h4"/>',
+};
+
+const KIND_LABEL: Record<string, string> = {
+  minify: "Compress",
+  format: "Beautify",
+  count: "Analyze",
+};
+---
+
+<BaseLayout>
+  <div class="flex min-h-screen flex-col">
+    <header
+      class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"
+    >
+      <div
+        class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
+      >
+        <a
+          href="/"
+          class="flex shrink-0 items-center gap-2 text-slate-900 dark:text-slate-50"
+        >
+          <span
+            class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 font-mono text-xs font-bold text-slate-50 dark:bg-slate-100 dark:text-slate-900"
+            aria-hidden="true">{`{}`}</span>
+          <span class="text-sm font-semibold tracking-tight">MinifyKit</span>
+        </a>
+        <a
+          href="https://github.com"
+          class="text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >v1.0</a
+        >
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6 sm:py-20">
+      <section class="mx-auto max-w-3xl text-center">
+        <h1
+          class="text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-slate-50"
+        >
+          Minify and format code, right in your browser.
+        </h1>
+        <p
+          class="mx-auto mt-4 max-w-2xl text-pretty text-base text-slate-600 sm:text-lg dark:text-slate-400"
+        >
+          Five focused tools for JavaScript, CSS, JSON, and HTML. No upload, no
+          signup — your code never leaves this tab.
+        </p>
+      </section>
+
+      <section
+        aria-label="Tools"
+        class="mt-12 grid gap-3 sm:mt-16 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {
+          TOOLS.map((tool) => (
+            <a
+              href={tool.slug}
+              class="group relative flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
+            >
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-slate-100 text-slate-700 transition-colors group-hover:bg-slate-900 group-hover:text-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-100 dark:group-hover:text-slate-900">
+                  <svg
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    set:html={ICONS[tool.id]}
+                  />
+                </span>
+                <div>
+                  <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
+                    {tool.label}
+                  </h2>
+                  <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-500">
+                    {KIND_LABEL[tool.kind]}
+                  </p>
+                </div>
+              </div>
+              <p class="text-sm text-slate-600 dark:text-slate-400">
+                {tool.intro}
+              </p>
+              <span class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-slate-900 dark:text-slate-100">
+                Open
+                <svg
+                  class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </span>
+            </a>
+          ))
+        }
+      </section>
+
+      <section
+        class="mx-auto mt-16 max-w-3xl rounded-lg border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600 sm:mt-20 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400"
+      >
+        <h2
+          class="mb-3 text-base font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Why client-side?
+        </h2>
+        <p class="leading-relaxed">
+          Every tool here runs entirely in your browser. There is no backend,
+          no database, and no analytics. Pasting a private API key or an
+          internal stylesheet is safe because the bytes never leave your
+          machine — you can verify by opening DevTools and watching the
+          Network tab while you process.
+        </p>
+      </section>
+    </main>
+
+    <footer
+      class="border-t border-slate-200 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-500"
+    >
+      Runs entirely in your browser · No uploads, no tracking
+    </footer>
+  </div>
+</BaseLayout>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://minifykit.pages.dev/sitemap-index.xml

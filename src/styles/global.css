@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-subtle: #f8fafc;
+  --fg: #0f172a;
+  --fg-muted: #475569;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --accent: #0f172a;
+  --accent-fg: #f8fafc;
+  --ring: #94a3b8;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --bg-subtle: #111827;
+  --fg: #e2e8f0;
+  --fg-muted: #94a3b8;
+  --border: #1f2937;
+  --border-strong: #334155;
+  --accent: #e2e8f0;
+  --accent-fg: #0b1220;
+  --ring: #475569;
+  --danger: #f87171;
+  --danger-bg: #2a1414;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+textarea {
+  font-family: var(--font-mono);
+}
