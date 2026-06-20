@@ -1,0 +1,95 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import ToolPageLayout from "~/components/ToolPageLayout.astro";
+import UrlCodecApp from "~/components/UrlCodecApp.astro";
+import { getTool } from "~/lib/processors";
+import { toolApplicationSchema } from "~/lib/seo";
+
+const tool = getTool("url-codec");
+const canonical = new URL(tool.slug + "/", Astro.site).toString();
+const schema = toolApplicationSchema(tool, canonical);
+const code =
+  "rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800";
+---
+
+<BaseLayout title={tool.title} description={tool.description} jsonLd={schema}>
+  <ToolPageLayout toolId={tool.id}>
+    <UrlCodecApp slot="tool" />
+
+    <article
+      slot="seo"
+      class="mx-auto mt-12 max-w-3xl space-y-8 text-sm leading-relaxed text-slate-600 sm:mt-16 dark:text-slate-400"
+    >
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          What is URL encoding (percent encoding)?
+        </h2>
+        <p>
+          URL encoding replaces characters that have a special meaning in URLs
+          — or are unsafe to transmit — with a <code class={code}>%XX</code>
+          escape, where <code class={code}>XX</code> is the byte's hex value.
+          For example, a space becomes <code class={code}>%20</code> and an
+          em-dash becomes <code class={code}>%E2%80%94</code>. The rules are
+          defined in <a
+            href="https://datatracker.ietf.org/doc/html/rfc3986"
+            class="text-slate-900 underline underline-offset-2 dark:text-slate-100"
+            rel="noopener"
+            target="_blank">RFC 3986</a
+          >.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Component vs Full URI — which mode should I pick?
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>
+            <strong>Component</strong> (<code class={code}>encodeURIComponent</code>) escapes
+            <em>everything</em> except a small unreserved set. Use it for the value
+            of a query parameter, a path segment, or any string you plan to
+            embed inside a larger URL — slashes, ampersands, and equals signs
+            all get encoded.
+          </li>
+          <li>
+            <strong>Full URI</strong> (<code class={code}>encodeURI</code>) leaves
+            URL structure characters (<code class={code}>/ : ? # &amp; =</code>) alone. Use it
+            on an entire URL that's already well-formed but contains spaces or
+            non-ASCII characters.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Common use cases
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>Encoding query string values: <code class={code}>?q=hello%20world</code>.</li>
+          <li>Form data sent as <code class={code}>application/x-www-form-urlencoded</code>.</li>
+          <li>Building <code class={code}>mailto:</code> and deep links with special characters in the body.</li>
+          <li>Safely embedding redirect URLs as a query parameter on an auth callback.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Privacy
+        </h2>
+        <p>
+          Encoding and decoding happen in your browser using the built-in
+          <code class={code}>encodeURIComponent</code> / <code class={code}>decodeURIComponent</code>
+          APIs. The URL or text you paste never leaves your machine.
+        </p>
+      </section>
+    </article>
+  </ToolPageLayout>
+</BaseLayout>

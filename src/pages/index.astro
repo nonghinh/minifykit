@@ -22,12 +22,26 @@ const ICONS: Record<string, string> = {
     '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
   "count-text":
     '<path d="M9 7V4h6v3"/><path d="M12 4v16"/><path d="M8 20h8"/><path d="M4 11h4M16 11h4"/>',
+  base64:
+    '<path d="M4 7h4v4H4zM10 7h4v4h-4zM16 7h4v4h-4zM4 13h4v4H4zM10 13h4v4h-4zM16 13h4v4h-4z"/>',
+  "jwt-decoder":
+    '<path d="M12 2v6"/><circle cx="12" cy="13" r="3"/><path d="M12 16v6"/><path d="M9 4l3-2 3 2"/><path d="M9 20l3 2 3-2"/>',
+  "url-codec":
+    '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  "hash-generator":
+    '<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
+  "uuid-generator":
+    '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/>',
 };
 
 const KIND_LABEL: Record<string, string> = {
   minify: "Compress",
   format: "Beautify",
   count: "Analyze",
+  encode: "Encode",
+  decode: "Decode",
+  hash: "Hash",
+  generate: "Generate",
 };
 ---
 
@@ -66,8 +80,9 @@ const KIND_LABEL: Record<string, string> = {
         <p
           class="mx-auto mt-4 max-w-2xl text-pretty text-base text-slate-600 sm:text-lg dark:text-slate-400"
         >
-          Five focused tools for JavaScript, CSS, JSON, and HTML. No upload, no
-          signup — your code never leaves this tab.
+          Eleven focused tools for JavaScript, CSS, JSON, HTML, and everyday
+          developer chores: encode, decode, hash, count, and generate. No
+          upload, no signup — your data never leaves this tab.
         </p>
       </section>
 

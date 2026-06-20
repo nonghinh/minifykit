@@ -1,0 +1,98 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import ToolPageLayout from "~/components/ToolPageLayout.astro";
+import UuidApp from "~/components/UuidApp.astro";
+import { getTool } from "~/lib/processors";
+import { toolApplicationSchema } from "~/lib/seo";
+
+const tool = getTool("uuid-generator");
+const canonical = new URL(tool.slug + "/", Astro.site).toString();
+const schema = toolApplicationSchema(tool, canonical);
+const code =
+  "rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800";
+---
+
+<BaseLayout title={tool.title} description={tool.description} jsonLd={schema}>
+  <ToolPageLayout toolId={tool.id}>
+    <UuidApp slot="tool" />
+
+    <article
+      slot="seo"
+      class="mx-auto mt-12 max-w-3xl space-y-8 text-sm leading-relaxed text-slate-600 sm:mt-16 dark:text-slate-400"
+    >
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          What is a UUID?
+        </h2>
+        <p>
+          A UUID (Universally Unique Identifier, also called a GUID) is a
+          128-bit identifier formatted as 32 hexadecimal digits with hyphens:
+          <code class={code}>xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx</code>. The
+          <code class={code}>M</code> nibble identifies the version and
+          <code class={code}>N</code> identifies the variant. UUIDs are
+          designed to be collision-free across machines without a central
+          coordinator, which makes them ideal for distributed systems.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          UUID v4 vs UUID v7 — which one should I use?
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>
+            <strong>UUID v4</strong> — 122 bits of randomness. Maximum entropy,
+            zero ordering. Great for opaque ids; bad for database primary keys
+            because random inserts trash B-tree locality.
+          </li>
+          <li>
+            <strong>UUID v7</strong> — first 48 bits encode a Unix millisecond
+            timestamp, followed by 74 random bits. <strong>Sortable</strong> by
+            creation time. The right default for new database primary keys: you
+            get UUID-style global uniqueness with sequential insert performance.
+            Defined in <a
+              href="https://datatracker.ietf.org/doc/html/rfc9562"
+              class="text-slate-900 underline underline-offset-2 dark:text-slate-100"
+              rel="noopener"
+              target="_blank">RFC 9562</a
+            >.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Common use cases
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>Primary keys in distributed databases.</li>
+          <li>Request and trace IDs that need to be unique across services.</li>
+          <li>File or upload IDs you don't want to look enumerable.</li>
+          <li>Idempotency keys for API write operations.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Where does the randomness come from?
+        </h2>
+        <p>
+          UUID v4 uses <code class={code}>crypto.randomUUID()</code> where
+          available, falling back to <code class={code}>crypto.getRandomValues()</code>.
+          UUID v7 uses the same cryptographically strong random source for its
+          74-bit random tail and <code class={code}>Date.now()</code> for the
+          48-bit timestamp prefix. No server is contacted — generation is
+          entirely local.
+        </p>
+      </section>
+    </article>
+  </ToolPageLayout>
+</BaseLayout>

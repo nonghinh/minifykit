@@ -1,0 +1,103 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import ToolPageLayout from "~/components/ToolPageLayout.astro";
+import JwtApp from "~/components/JwtApp.astro";
+import { getTool } from "~/lib/processors";
+import { toolApplicationSchema } from "~/lib/seo";
+
+const tool = getTool("jwt-decoder");
+const canonical = new URL(tool.slug + "/", Astro.site).toString();
+const schema = toolApplicationSchema(tool, canonical);
+const code =
+  "rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800";
+---
+
+<BaseLayout title={tool.title} description={tool.description} jsonLd={schema}>
+  <ToolPageLayout toolId={tool.id}>
+    <JwtApp slot="tool" />
+
+    <article
+      slot="seo"
+      class="mx-auto mt-12 max-w-3xl space-y-8 text-sm leading-relaxed text-slate-600 sm:mt-16 dark:text-slate-400"
+    >
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          What is a JSON Web Token (JWT)?
+        </h2>
+        <p>
+          A JWT is a compact, URL-safe credential format defined in <a
+            href="https://datatracker.ietf.org/doc/html/rfc7519"
+            class="text-slate-900 underline underline-offset-2 dark:text-slate-100"
+            rel="noopener"
+            target="_blank">RFC 7519</a
+          >. It packs three Base64URL-encoded segments — <strong>header</strong>,
+          <strong>payload</strong>, and <strong>signature</strong> — joined by
+          dots: <code class={code}>xxxxx.yyyyy.zzzzz</code>. The header
+          describes the signing algorithm; the payload contains claims; the
+          signature lets the receiver verify the token wasn't tampered with.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          What does this decoder show?
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>The <strong>header</strong> JSON, formatted with 2-space indent.</li>
+          <li>The <strong>payload</strong> JSON, with standard timestamp claims (<code class={code}>iat</code>, <code class={code}>nbf</code>, <code class={code}>exp</code>) annotated in ISO 8601.</li>
+          <li>The raw Base64URL <strong>signature</strong>.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Common payload claims
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li><code class={code}>iss</code> — issuer (who created the token).</li>
+          <li><code class={code}>sub</code> — subject (typically the user id).</li>
+          <li><code class={code}>aud</code> — audience (intended recipient).</li>
+          <li><code class={code}>exp</code> — expiration time (Unix seconds).</li>
+          <li><code class={code}>iat</code> — issued at (Unix seconds).</li>
+          <li><code class={code}>nbf</code> — not valid before (Unix seconds).</li>
+          <li><code class={code}>jti</code> — JWT ID, for revocation lookups.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Is this safe to use with production tokens?
+        </h2>
+        <p>
+          Yes. The token never leaves your browser — there is no backend.
+          Decoding only reads the public Base64 segments; nothing about the
+          signature is sent anywhere. Still, treat the decoded payload like
+          you would any other secret on your screen.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          This tool does not verify signatures
+        </h2>
+        <p>
+          Verifying a JWT requires the issuer's public key (RS256/ES256) or
+          shared secret (HS256). That step happens server-side. This decoder
+          only displays what's inside the token; it does not prove the token
+          is authentic or unexpired. Never trust an unverified JWT for
+          authorization decisions.
+        </p>
+      </section>
+    </article>
+  </ToolPageLayout>
+</BaseLayout>

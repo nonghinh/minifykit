@@ -1,0 +1,77 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import ToolPageLayout from "~/components/ToolPageLayout.astro";
+import Base64App from "~/components/Base64App.astro";
+import { getTool } from "~/lib/processors";
+import { toolApplicationSchema } from "~/lib/seo";
+
+const tool = getTool("base64");
+const canonical = new URL(tool.slug + "/", Astro.site).toString();
+const schema = toolApplicationSchema(tool, canonical);
+---
+
+<BaseLayout title={tool.title} description={tool.description} jsonLd={schema}>
+  <ToolPageLayout toolId={tool.id}>
+    <Base64App slot="tool" />
+
+    <article
+      slot="seo"
+      class="prose-mk mx-auto mt-12 max-w-3xl space-y-8 text-sm leading-relaxed text-slate-600 sm:mt-16 dark:text-slate-400"
+    >
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          What is Base64 encoding?
+        </h2>
+        <p>
+          Base64 is a binary-to-text encoding that represents arbitrary bytes
+          using only 64 ASCII characters: <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">A–Z</code>, <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">a–z</code>, <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">0–9</code>, <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">+</code>, and <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">/</code>.
+          Every 3 input bytes become 4 output characters, padded with <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">=</code> when needed.
+          The encoded form is ~33% larger than the original.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          When should I use Base64?
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>Embedding small images or fonts inline via <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">data:</code> URIs in CSS or HTML.</li>
+          <li>HTTP Basic Authentication headers (<code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">Authorization: Basic &lt;base64&gt;</code>).</li>
+          <li>Encoding the header and payload of a JSON Web Token (uses URL-safe Base64).</li>
+          <li>Safely sending binary data over text-only channels like email (MIME) or JSON fields.</li>
+        </ul>
+        <p class="mt-3">
+          <strong>Base64 is not encryption.</strong> Anyone can decode it. Use it for transport, not for secrecy.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          UTF-8 and emoji handling
+        </h2>
+        <p>
+          The native browser functions <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">btoa()</code> and <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">atob()</code> only work on Latin-1 strings and throw on non-ASCII input. This tool wraps them with a <code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">TextEncoder</code>/<code class="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800">TextDecoder</code> pass so that UTF-8 text — including emojis and CJK characters — round-trips exactly.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Privacy
+        </h2>
+        <p>
+          Encoding and decoding both happen entirely in your browser. Open the
+          Network tab while you process — there are zero requests. Safe to use
+          with sensitive strings, credentials, or internal data.
+        </p>
+      </section>
+    </article>
+  </ToolPageLayout>
+</BaseLayout>

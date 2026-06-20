@@ -15,7 +15,12 @@ export async function loadProcessor(id: ToolId): Promise<Processor> {
     case "format-css":
       return (await import("./format-css")).formatCss;
     case "count-text":
-      throw new Error("count-text has no processor (handled by CounterApp)");
+    case "base64":
+    case "jwt-decoder":
+    case "url-codec":
+    case "hash-generator":
+    case "uuid-generator":
+      throw new Error(`${id} has no processor (handled by its own component)`);
   }
 }
 

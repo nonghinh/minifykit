@@ -1,0 +1,108 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import ToolPageLayout from "~/components/ToolPageLayout.astro";
+import HashApp from "~/components/HashApp.astro";
+import { getTool } from "~/lib/processors";
+import { toolApplicationSchema } from "~/lib/seo";
+
+const tool = getTool("hash-generator");
+const canonical = new URL(tool.slug + "/", Astro.site).toString();
+const schema = toolApplicationSchema(tool, canonical);
+const code =
+  "rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800";
+---
+
+<BaseLayout title={tool.title} description={tool.description} jsonLd={schema}>
+  <ToolPageLayout toolId={tool.id}>
+    <HashApp slot="tool" />
+
+    <article
+      slot="seo"
+      class="mx-auto mt-12 max-w-3xl space-y-8 text-sm leading-relaxed text-slate-600 sm:mt-16 dark:text-slate-400"
+    >
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          What is a cryptographic hash function?
+        </h2>
+        <p>
+          A hash function turns input of any length into a fixed-size digest.
+          A small change in input produces a wildly different digest (the
+          avalanche effect), and it's computationally infeasible to find the
+          input from the digest. That makes hashes useful for fingerprinting
+          data, detecting tampering, or addressing content by its contents
+          rather than its name.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          SHA-1 vs SHA-256 vs SHA-512
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>
+            <strong>SHA-1</strong> (160-bit) — chosen-prefix collisions have
+            been demonstrated. Don't use it for digital signatures or anything
+            security-sensitive. Still fine for non-security fingerprints
+            (e.g. cache keys).
+          </li>
+          <li>
+            <strong>SHA-256</strong> (256-bit) — the modern default. Used by
+            TLS, git (since 2.42), and Bitcoin. No practical attacks known.
+          </li>
+          <li>
+            <strong>SHA-512</strong> (512-bit) — larger digest, often faster
+            than SHA-256 on 64-bit hardware because it processes the message
+            in 128-byte blocks instead of 64.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Common use cases
+        </h2>
+        <ul class="list-disc space-y-1 pl-5">
+          <li>Verifying file or release artifact integrity (checksum).</li>
+          <li>Content-addressable storage (git objects, IPFS, Docker layers).</li>
+          <li>HMAC and digital signature primitives.</li>
+          <li>Cache keys for memoization where collisions don't matter.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Do not use a plain hash for passwords
+        </h2>
+        <p>
+          SHA-256 is fast. Attackers love fast. For password storage you want
+          a slow, memory-hard function with a per-user salt — use
+          <strong>bcrypt</strong>, <strong>scrypt</strong>, or
+          <strong>Argon2</strong>. A bare SHA hash with no salt or iteration
+          count can be brute-forced at hundreds of millions of guesses per
+          second on a single GPU.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-50"
+        >
+          Privacy
+        </h2>
+        <p>
+          All three hashes are computed locally using the browser's
+          <code class={code}>crypto.subtle.digest</code> Web Crypto API. The
+          text you type is never sent to a server.
+        </p>
+      </section>
+    </article>
+  </ToolPageLayout>
+</BaseLayout>
