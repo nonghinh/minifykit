@@ -9,41 +9,67 @@ const { currentSlug } = Astro.props;
 
 type Kind = ToolMeta["kind"];
 
-const KIND_LABEL: Record<Kind, string> = {
-  minify: "Minify",
-  format: "Format",
-  encode: "Encode",
-  decode: "Decode",
-  hash: "Hash",
-  generate: "Generate",
-  count: "Analyze",
-};
+interface MenuGroup {
+  id: string;
+  label: string;
+  /** When set, render the panel as titled sub-sections in this order. */
+  subKinds?: { kind: Kind; label: string }[];
+  kinds: Kind[];
+}
 
-const KIND_ORDER: Kind[] = [
-  "minify",
-  "format",
-  "encode",
-  "decode",
-  "hash",
-  "generate",
-  "count",
+const MENUS: MenuGroup[] = [
+  {
+    id: "minify",
+    label: "Minify",
+    kinds: ["minify"],
+  },
+  {
+    id: "format",
+    label: "Format",
+    kinds: ["format"],
+  },
+  {
+    id: "encode",
+    label: "Encode/Decode",
+    kinds: ["encode", "decode", "hash", "generate", "count"],
+    subKinds: [
+      { kind: "encode", label: "Encode" },
+      { kind: "decode", label: "Decode" },
+      { kind: "hash", label: "Hash" },
+      { kind: "generate", label: "Generate" },
+      { kind: "count", label: "Analyze" },
+    ],
+  },
 ];
 
-const groups = KIND_ORDER.map((kind) => ({
-  kind,
-  label: KIND_LABEL[kind],
-  tools: TOOLS.filter((t) => t.kind === kind),
-})).filter((g) => g.tools.length > 0);
+function toolsFor(kinds: Kind[]) {
+  return TOOLS.filter((t) => kinds.includes(t.kind));
+}
 
-const currentTool = TOOLS.find((t) => t.slug === currentSlug);
-const buttonLabel = currentTool ? currentTool.label : "Tools";
+function isActiveMenu(menu: MenuGroup) {
+  return toolsFor(menu.kinds).some((t) => t.slug === currentSlug);
+}
+
+const itemBase =
+  "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1";
+const itemActive =
+  "bg-slate-900 font-medium text-slate-50 dark:bg-slate-100 dark:text-slate-900";
+const itemInactive =
+  "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800";
+
+const buttonBase =
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 sm:gap-2 sm:px-3";
+const buttonActive =
+  "border-slate-900 bg-slate-900 text-slate-50 dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900";
+const buttonInactive =
+  "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100";
 ---
 
 <header
   class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"
 >
   <div
-    class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6"
+    class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6"
   >
     <a
       href="/"
@@ -52,104 +78,143 @@ const buttonLabel = currentTool ? currentTool.label : "Tools";
       <span
         class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 font-mono text-xs font-bold text-slate-50 dark:bg-slate-100 dark:text-slate-900"
         aria-hidden="true">{`{}`}</span>
-      <span class="text-sm font-semibold tracking-tight">MinifyKit</span>
+      <span class="hidden text-sm font-semibold tracking-tight sm:inline"
+        >MinifyKit</span
+      >
     </a>
 
-    <div class="relative">
-      <button
-        type="button"
-        data-tools-menu-button
-        aria-haspopup="menu"
-        aria-expanded="false"
-        aria-controls="mk-tools-menu"
-        class="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-      >
-        <svg
-          class="h-4 w-4 text-slate-500 dark:text-slate-400"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <span class="max-w-[7rem] truncate sm:max-w-none">{buttonLabel}</span>
-        <svg
-          class="h-3.5 w-3.5 text-slate-500 transition-transform dark:text-slate-400"
-          data-tools-menu-chevron
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m6 9 6 6 6-6"></path>
-        </svg>
-      </button>
+    <nav
+      aria-label="Tools"
+      class="flex flex-1 items-center justify-center gap-1 sm:gap-2"
+    >
+      {
+        MENUS.map((menu) => {
+          const active = isActiveMenu(menu);
+          return (
+            <div class="relative">
+              <button
+                type="button"
+                data-tools-menu-button
+                data-menu-id={menu.id}
+                aria-haspopup="menu"
+                aria-expanded="false"
+                aria-controls={`mk-menu-${menu.id}`}
+                class:list={[buttonBase, active ? buttonActive : buttonInactive]}
+              >
+                <span>{menu.label}</span>
+                <svg
+                  class="h-3.5 w-3.5 transition-transform"
+                  data-tools-menu-chevron
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
 
-      <div
-        id="mk-tools-menu"
-        data-tools-menu
-        role="menu"
-        hidden
-        class="absolute left-1/2 top-full z-40 mt-2 w-[min(92vw,640px)] -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-950 dark:ring-white/5"
-      >
-        <div class="grid gap-3 sm:grid-cols-2">
-          {
-            groups.map((group) => (
-              <div>
-                <div class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-500">
-                  {group.label}
-                </div>
-                <ul class="flex flex-col">
-                  {group.tools.map((t) => {
-                    const active = t.slug === currentSlug;
-                    return (
-                      <li>
-                        <a
-                          href={t.slug}
-                          role="menuitem"
-                          aria-current={active ? "page" : undefined}
-                          class:list={[
-                            "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1",
-                            active
-                              ? "bg-slate-900 font-medium text-slate-50 dark:bg-slate-100 dark:text-slate-900"
-                              : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
-                          ]}
-                        >
-                          <span>{t.label}</span>
-                          {active && (
-                            <svg
-                              class="h-3.5 w-3.5"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2.5"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M20 6 9 17l-5-5" />
-                            </svg>
-                          )}
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
+              <div
+                id={`mk-menu-${menu.id}`}
+                data-tools-menu
+                data-menu-id={menu.id}
+                role="menu"
+                hidden
+                class="absolute left-1/2 top-full z-40 mt-2 w-[min(92vw,360px)] -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-950 dark:ring-white/5"
+              >
+                {menu.subKinds ? (
+                  <div class="space-y-2">
+                    {menu.subKinds.map((sub) => {
+                      const tools = toolsFor([sub.kind]);
+                      if (tools.length === 0) return null;
+                      return (
+                        <div>
+                          <div class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-500">
+                            {sub.label}
+                          </div>
+                          <ul class="flex flex-col">
+                            {tools.map((t) => {
+                              const isCurrent = t.slug === currentSlug;
+                              return (
+                                <li>
+                                  <a
+                                    href={t.slug}
+                                    role="menuitem"
+                                    aria-current={isCurrent ? "page" : undefined}
+                                    class:list={[
+                                      itemBase,
+                                      isCurrent ? itemActive : itemInactive,
+                                    ]}
+                                  >
+                                    <span>{t.label}</span>
+                                    {isCurrent && (
+                                      <svg
+                                        class="h-3.5 w-3.5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                      >
+                                        <path d="M20 6 9 17l-5-5" />
+                                      </svg>
+                                    )}
+                                  </a>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <ul class="flex flex-col">
+                    {toolsFor(menu.kinds).map((t) => {
+                      const isCurrent = t.slug === currentSlug;
+                      return (
+                        <li>
+                          <a
+                            href={t.slug}
+                            role="menuitem"
+                            aria-current={isCurrent ? "page" : undefined}
+                            class:list={[
+                              itemBase,
+                              isCurrent ? itemActive : itemInactive,
+                            ]}
+                          >
+                            <span>{t.label}</span>
+                            {isCurrent && (
+                              <svg
+                                class="h-3.5 w-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="M20 6 9 17l-5-5" />
+                              </svg>
+                            )}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
-            ))
-          }
-        </div>
-      </div>
-    </div>
+            </div>
+          );
+        })
+      }
+    </nav>
 
     <button
       type="button"
@@ -187,39 +252,75 @@ const buttonLabel = currentTool ? currentTool.label : "Tools";
 </header>
 
 <script>
-  function initToolsMenu() {
-    const button = document.querySelector<HTMLButtonElement>(
-      "[data-tools-menu-button]",
+  function initToolsMenus() {
+    const buttons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>(
+        "[data-tools-menu-button]",
+      ),
     );
-    const panel = document.querySelector<HTMLElement>("[data-tools-menu]");
-    const chevron = document.querySelector<HTMLElement>(
-      "[data-tools-menu-chevron]",
+    const panels = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-tools-menu]"),
     );
-    if (!button || !panel) return;
+    if (buttons.length === 0) return;
 
-    function setOpen(open: boolean) {
-      button!.setAttribute("aria-expanded", open ? "true" : "false");
-      panel!.hidden = !open;
-      if (chevron) chevron.style.transform = open ? "rotate(180deg)" : "";
+    function findBtn(id: string | null) {
+      return buttons.find((b) => b.dataset.menuId === id) ?? null;
+    }
+    function findPanel(id: string | null) {
+      return panels.find((p) => p.dataset.menuId === id) ?? null;
     }
 
-    button.addEventListener("click", (e) => {
-      e.stopPropagation();
-      setOpen(button!.getAttribute("aria-expanded") !== "true");
-    });
+    function closeAll() {
+      for (const btn of buttons) {
+        btn.setAttribute("aria-expanded", "false");
+        const chev = btn.querySelector<HTMLElement>("[data-tools-menu-chevron]");
+        if (chev) chev.style.transform = "";
+      }
+      for (const panel of panels) panel.hidden = true;
+    }
+
+    function open(id: string) {
+      closeAll();
+      const btn = findBtn(id);
+      const panel = findPanel(id);
+      if (btn) {
+        btn.setAttribute("aria-expanded", "true");
+        const chev = btn.querySelector<HTMLElement>("[data-tools-menu-chevron]");
+        if (chev) chev.style.transform = "rotate(180deg)";
+      }
+      if (panel) panel.hidden = false;
+    }
+
+    for (const btn of buttons) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.menuId ?? "";
+        if (btn.getAttribute("aria-expanded") === "true") closeAll();
+        else open(id);
+      });
+    }
 
     document.addEventListener("click", (e) => {
-      if (panel!.hidden) return;
+      const anyOpen = buttons.some(
+        (b) => b.getAttribute("aria-expanded") === "true",
+      );
+      if (!anyOpen) return;
       const target = e.target as Node;
-      if (!panel!.contains(target) && !button!.contains(target)) setOpen(false);
+      const insideAny =
+        buttons.some((b) => b.contains(target)) ||
+        panels.some((p) => p.contains(target));
+      if (!insideAny) closeAll();
     });
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
-      if (panel!.hidden) return;
-      setOpen(false);
-      button!.focus();
+      const activeBtn = buttons.find(
+        (b) => b.getAttribute("aria-expanded") === "true",
+      );
+      if (!activeBtn) return;
+      closeAll();
+      activeBtn.focus();
     });
   }
-  initToolsMenu();
+  initToolsMenus();
 </script>
