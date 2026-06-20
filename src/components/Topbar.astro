@@ -1,5 +1,5 @@
 ---
-import { TOOLS } from "~/lib/processors";
+import { TOOLS, type ToolMeta } from "~/lib/processors";
 
 interface Props {
   currentSlug?: string;
@@ -7,109 +7,219 @@ interface Props {
 
 const { currentSlug } = Astro.props;
 
-const tabBase =
-  "inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
-const tabInactive =
-  "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800";
-const tabActive =
-  "bg-slate-900 text-slate-50 shadow-sm dark:bg-slate-100 dark:text-slate-900";
+type Kind = ToolMeta["kind"];
+
+const KIND_LABEL: Record<Kind, string> = {
+  minify: "Minify",
+  format: "Format",
+  encode: "Encode",
+  decode: "Decode",
+  hash: "Hash",
+  generate: "Generate",
+  count: "Analyze",
+};
+
+const KIND_ORDER: Kind[] = [
+  "minify",
+  "format",
+  "encode",
+  "decode",
+  "hash",
+  "generate",
+  "count",
+];
+
+const groups = KIND_ORDER.map((kind) => ({
+  kind,
+  label: KIND_LABEL[kind],
+  tools: TOOLS.filter((t) => t.kind === kind),
+})).filter((g) => g.tools.length > 0);
+
+const currentTool = TOOLS.find((t) => t.slug === currentSlug);
+const buttonLabel = currentTool ? currentTool.label : "Tools";
 ---
 
 <header
   class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"
 >
-  <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
-    <div class="flex h-14 items-center justify-between gap-3 md:gap-4">
-      <a
-        href="/"
-        class="flex shrink-0 items-center gap-2 text-slate-900 dark:text-slate-50"
-      >
-        <span
-          class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 font-mono text-xs font-bold text-slate-50 dark:bg-slate-100 dark:text-slate-900"
-          aria-hidden="true">{`{}`}</span>
-        <span class="text-sm font-semibold tracking-tight">MinifyKit</span>
-      </a>
+  <div
+    class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6"
+  >
+    <a
+      href="/"
+      class="flex shrink-0 items-center gap-2 text-slate-900 dark:text-slate-50"
+    >
+      <span
+        class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 font-mono text-xs font-bold text-slate-50 dark:bg-slate-100 dark:text-slate-900"
+        aria-hidden="true">{`{}`}</span>
+      <span class="text-sm font-semibold tracking-tight">MinifyKit</span>
+    </a>
 
-      <nav
-        aria-label="Tools"
-        class="hidden min-w-0 flex-1 overflow-x-auto px-1 md:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    <div class="relative">
+      <button
+        type="button"
+        data-tools-menu-button
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-controls="mk-tools-menu"
+        class="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
       >
-        <div
-          class="mx-auto inline-flex w-max items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-900"
+        <svg
+          class="h-4 w-4 text-slate-500 dark:text-slate-400"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
         >
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <span class="max-w-[7rem] truncate sm:max-w-none">{buttonLabel}</span>
+        <svg
+          class="h-3.5 w-3.5 text-slate-500 transition-transform dark:text-slate-400"
+          data-tools-menu-chevron
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </button>
+
+      <div
+        id="mk-tools-menu"
+        data-tools-menu
+        role="menu"
+        hidden
+        class="absolute left-1/2 top-full z-40 mt-2 w-[min(92vw,640px)] -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-950 dark:ring-white/5"
+      >
+        <div class="grid gap-3 sm:grid-cols-2">
           {
-            TOOLS.map((t) => (
-              <a
-                href={t.slug}
-                aria-current={t.slug === currentSlug ? "page" : undefined}
-                class:list={[
-                  tabBase,
-                  t.slug === currentSlug ? tabActive : tabInactive,
-                ]}
-              >
-                {t.label}
-              </a>
+            groups.map((group) => (
+              <div>
+                <div class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-500">
+                  {group.label}
+                </div>
+                <ul class="flex flex-col">
+                  {group.tools.map((t) => {
+                    const active = t.slug === currentSlug;
+                    return (
+                      <li>
+                        <a
+                          href={t.slug}
+                          role="menuitem"
+                          aria-current={active ? "page" : undefined}
+                          class:list={[
+                            "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1",
+                            active
+                              ? "bg-slate-900 font-medium text-slate-50 dark:bg-slate-100 dark:text-slate-900"
+                              : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+                          ]}
+                        >
+                          <span>{t.label}</span>
+                          {active && (
+                            <svg
+                              class="h-3.5 w-3.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M20 6 9 17l-5-5" />
+                            </svg>
+                          )}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             ))
           }
         </div>
-      </nav>
-
-      <button
-        type="button"
-        data-theme-toggle
-        aria-label="Toggle theme"
-        class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-50"
-      >
-        <svg
-          class="hidden h-4 w-4 dark:block"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="4"></circle>
-          <path
-            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-          ></path>
-        </svg>
-        <svg
-          class="h-4 w-4 dark:hidden"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      </button>
+      </div>
     </div>
 
-    <nav
-      aria-label="Tools"
-      class="-mx-4 overflow-x-auto px-4 pb-2 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    <button
+      type="button"
+      data-theme-toggle
+      aria-label="Toggle theme"
+      class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-50"
     >
-      <div
-        class="inline-flex w-max items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-900"
+      <svg
+        class="hidden h-4 w-4 dark:block"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       >
-        {
-          TOOLS.map((t) => (
-            <a
-              href={t.slug}
-              aria-current={t.slug === currentSlug ? "page" : undefined}
-              class:list={[
-                tabBase,
-                t.slug === currentSlug ? tabActive : tabInactive,
-              ]}
-            >
-              {t.label}
-            </a>
-          ))
-        }
-      </div>
-    </nav>
+        <circle cx="12" cy="12" r="4"></circle>
+        <path
+          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+        ></path>
+      </svg>
+      <svg
+        class="h-4 w-4 dark:hidden"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
   </div>
 </header>
+
+<script>
+  function initToolsMenu() {
+    const button = document.querySelector<HTMLButtonElement>(
+      "[data-tools-menu-button]",
+    );
+    const panel = document.querySelector<HTMLElement>("[data-tools-menu]");
+    const chevron = document.querySelector<HTMLElement>(
+      "[data-tools-menu-chevron]",
+    );
+    if (!button || !panel) return;
+
+    function setOpen(open: boolean) {
+      button!.setAttribute("aria-expanded", open ? "true" : "false");
+      panel!.hidden = !open;
+      if (chevron) chevron.style.transform = open ? "rotate(180deg)" : "";
+    }
+
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(button!.getAttribute("aria-expanded") !== "true");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (panel!.hidden) return;
+      const target = e.target as Node;
+      if (!panel!.contains(target) && !button!.contains(target)) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (panel!.hidden) return;
+      setOpen(false);
+      button!.focus();
+    });
+  }
+  initToolsMenu();
+</script>
